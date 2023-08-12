@@ -1,0 +1,42 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# Load the Titanic dataset
+url = "https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuff/titanic.csv"
+data = pd.read_csv(url)
+
+# Select relevant features and target variable
+features = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare', 'Embarked']
+target = 'Survived'
+data = data[features + [target]]
+
+# Preprocess data
+data.dropna(inplace=True)  # Remove rows with missing values
+X = data[features]
+y = data[target]
+
+# Convert categorical features to numerical using one-hot encoding
+X = pd.get_dummies(X, columns=['Pclass', 'Sex', 'Embarked'], drop_first=True)
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize numerical features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Build a Random Forest Classifier
+clf = RandomForestClassifier(random_state=42)
+clf.fit(X_train_scaled, y_train)
+
+# Make predictions
+y_pred = clf.predict(X_test_scaled)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy:.2f}")
